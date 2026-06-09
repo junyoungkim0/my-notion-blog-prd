@@ -7,3 +7,6 @@ export { default as Navigation } from "./Navigation";
 export { default as SearchBox } from "./SearchBox";
 export { default as Tag } from "./Tag";
 export { default as MainLayout } from "./MainLayout";
+export { default as PostHeader } from "./PostHeader";
+export { default as PostContent } from "./PostContent";
+export { default as RelatedPosts } from "./RelatedPosts";
