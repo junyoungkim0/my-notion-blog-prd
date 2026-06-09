@@ -1,17 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { BlogPost } from "@/lib/types";
 import { getAllPosts } from "@/lib/api";
-import { BlogList, SearchBox } from "@/components";
-import { searchInText } from "@/lib/utils";
+import { BlogList, SearchBox, FilterBar } from "@/components";
+import {
+  filterPosts,
+  extractCategories,
+  extractTags,
+  FilterOptions,
+} from "@/lib/filter";
 
 export default function BlogPage() {
+  const searchParams = useSearchParams();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+
+  // 필터 상태
+  const [filters, setFilters] = useState<FilterOptions>({
+    searchQuery: searchParams.get("search") || "",
+    category: searchParams.get("category") || undefined,
+    tags: searchParams.get("tags")?.split(",").filter(Boolean) || [],
+    sortBy: (searchParams.get("sort") as any) || "latest",
+  });
+
+  const [categories, setCategories] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
 
   // 초기 로드
   useEffect(() => {
@@ -20,7 +37,8 @@ export default function BlogPage() {
         setIsLoading(true);
         const data = await getAllPosts();
         setPosts(data);
-        setFilteredPosts(data);
+        setCategories(extractCategories(data));
+        setTags(extractTags(data));
       } catch (err) {
         setError("블로그 포스트를 불러오는 데 실패했습니다.");
         console.error(err);
@@ -32,25 +50,40 @@ export default function BlogPage() {
     fetchPosts();
   }, []);
 
-  // 검색 처리
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-
-    if (!query.trim()) {
-      setFilteredPosts(posts);
-      return;
-    }
-
-    const filtered = posts.filter(
-      (post) =>
-        searchInText(post.title, query) ||
-        searchInText(post.excerpt, query) ||
-        searchInText(post.content, query) ||
-        post.tags.some((tag) => searchInText(tag, query))
-    );
-
+  // 필터링 적용
+  useEffect(() => {
+    const filtered = filterPosts(posts, filters);
     setFilteredPosts(filtered);
-  };
+
+    // URL 업데이트
+    const params = new URLSearchParams();
+    if (filters.searchQuery) params.set("search", filters.searchQuery);
+    if (filters.category) params.set("category", filters.category);
+    if (filters.tags?.length) params.set("tags", filters.tags.join(","));
+    if (filters.sortBy !== "latest") params.set("sort", filters.sortBy);
+
+    const queryString = params.toString();
+    const newUrl = queryString
+      ? `/blog?${queryString}`
+      : "/blog";
+    window.history.replaceState({}, "", newUrl);
+  }, [filters, posts]);
+
+  // 검색 처리
+  const handleSearch = useCallback((query: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      searchQuery: query,
+    }));
+  }, []);
+
+  // 필터 변경 처리
+  const handleFilterChange = useCallback((newFilters: FilterOptions) => {
+    setFilters({
+      searchQuery: filters.searchQuery,
+      ...newFilters,
+    });
+  }, [filters.searchQuery]);
 
   return (
     <div className="space-y-8">
@@ -84,6 +117,18 @@ export default function BlogPage() {
         </div>
       )}
 
+      {/* 필터 바 */}
+      {!error && posts.length > 0 && (
+        <FilterBar
+          categories={categories}
+          tags={tags}
+          onFilterChange={handleFilterChange}
+          selectedCategory={filters.category}
+          selectedTags={filters.tags}
+          sortBy={filters.sortBy as "latest" | "oldest" | "title"}
+        />
+      )}
+
       {/* 블로그 목록 */}
       <BlogList
         posts={filteredPosts}
@@ -92,20 +137,30 @@ export default function BlogPage() {
         emptyMessage="아직 발행된 블로그 포스트가 없습니다."
       />
 
-      {/* 검색 결과 없음 */}
-      {!isLoading && !error && searchQuery && filteredPosts.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg mb-4">
-            '{searchQuery}'에 대한 검색 결과가 없습니다.
-          </p>
-          <button
-            onClick={() => handleSearch("")}
-            className="text-blue-600 hover:text-blue-700 font-semibold"
-          >
-            검색 초기화
-          </button>
-        </div>
-      )}
+      {/* 필터 결과 없음 */}
+      {!isLoading &&
+        !error &&
+        posts.length > 0 &&
+        filteredPosts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg mb-4">
+              현재 필터 조건에 맞는 포스트가 없습니다.
+            </p>
+            <button
+              onClick={() =>
+                setFilters({
+                  searchQuery: "",
+                  category: undefined,
+                  tags: [],
+                  sortBy: "latest",
+                })
+              }
+              className="text-blue-600 hover:text-blue-700 font-semibold"
+            >
+              필터 초기화
+            </button>
+          </div>
+        )}
     </div>
   );
 }

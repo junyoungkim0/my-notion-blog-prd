@@ -2,5 +2,6 @@
 export * from "./api";
 export * from "./types";
 export * from "./utils";
+export * from "./filter";
 export { default as notion } from "./notion-client";
 export { getDatabaseId } from "./notion-client";

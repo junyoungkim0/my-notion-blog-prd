@@ -40,10 +40,13 @@ Notion을 기반으로 한 현대적인 블로그 플랫폼입니다.
 - [x] 태그 페이지 (`/tags/[tag]`)
   - 태그별 포스트 필터링
 
-### Phase 4: 카테고리 필터 및 검색 기능
-- [ ] 카테고리 필터링
-- [ ] 검색 기능
-- [ ] 태그 필터링
+### Phase 4: 카테고리 필터 및 검색 기능 ✅
+- [x] 고급 필터 바 컴포넌트 (FilterBar)
+- [x] 카테고리 필터링
+- [x] 태그 멀티 필터링
+- [x] 정렬 옵션 (최신순, 오래된순, 제목순)
+- [x] URL query params로 필터 상태 저장
+- [x] 검색 + 필터 통합 기능
 
 ### Phase 5: SEO 최적화 및 Vercel 배포
 - [ ] SEO 메타 태그
@@ -155,6 +158,12 @@ my-notion-blog-prd/
 - 같은 카테고리의 관련 포스트 표시
 - 최대 3개 포스트 표시
 
+### FilterBar
+- 정렬 옵션 (최신순, 오래된순, 제목순)
+- 카테고리 필터
+- 태그 멀티 필터
+- 필터 상태 표시 및 초기화
+
 ## 📍 주요 페이지 라우트
 
 | 경로 | 설명 |
@@ -165,6 +174,25 @@ my-notion-blog-prd/
 | `/categories` | 카테고리 목록 |
 | `/categories/[name]` | 카테고리별 포스트 목록 |
 | `/tags/[tag]` | 태그별 포스트 목록 |
+
+## 🔍 필터 및 검색 기능
+
+### 필터 옵션
+- **정렬**: 최신순, 오래된순, 제목순
+- **카테고리**: 단일 선택
+- **태그**: 다중 선택 (AND 필터링)
+- **검색**: 제목, 요약, 내용, 태그에서 검색
+
+### URL Query Parameters
+필터 상태는 URL에 저장되어 공유 가능합니다:
+```
+/blog?search=keyword&category=Tech&tags=javascript,react&sort=latest
+```
+
+### 필터링 로직 (`lib/filter.ts`)
+- `filterPosts()`: 필터 옵션에 따라 포스트 필터링
+- `extractCategories()`: 모든 유니크한 카테고리 추출
+- `extractTags()`: 모든 유니크한 태그 추출
 
 ## 📝 라이선스
 

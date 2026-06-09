@@ -10,3 +10,4 @@ export { default as MainLayout } from "./MainLayout";
 export { default as PostHeader } from "./PostHeader";
 export { default as PostContent } from "./PostContent";
 export { default as RelatedPosts } from "./RelatedPosts";
+export { default as FilterBar } from "./FilterBar";
