@@ -1,0 +1,12 @@
+# 모든 검색 엔진에 대한 크롤링 규칙
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+# 크롤링 지연 설정 (선택사항)
+Crawl-delay: 1
+
+# Sitemap 위치
+Sitemap: https://yourdomain.com/sitemap.xml

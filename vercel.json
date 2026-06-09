@@ -1,0 +1,44 @@
+{
+  "buildCommand": "next build",
+  "installCommand": "npm install",
+  "devCommand": "next dev",
+  "framework": "nextjs",
+  "env": [
+    {
+      "key": "NOTION_API_KEY",
+      "description": "Notion Integration API Key"
+    },
+    {
+      "key": "NOTION_DATABASE_ID",
+      "description": "Notion Database ID for blog posts"
+    },
+    {
+      "key": "NEXT_PUBLIC_BASE_URL",
+      "description": "Base URL of the website"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=3600, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/feed.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+        }
+      ]
+    }
+  ]
+}

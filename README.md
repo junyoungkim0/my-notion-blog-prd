@@ -48,10 +48,16 @@ Notion을 기반으로 한 현대적인 블로그 플랫폼입니다.
 - [x] URL query params로 필터 상태 저장
 - [x] 검색 + 필터 통합 기능
 
-### Phase 5: SEO 최적화 및 Vercel 배포
-- [ ] SEO 메타 태그
-- [ ] Sitemap 생성
-- [ ] Vercel 배포 설정
+### Phase 5: SEO 최적화 및 Vercel 배포 ✅
+- [x] SEO 메타 태그 최적화
+- [x] 동적 Sitemap 생성 (`/sitemap.xml`)
+- [x] RSS 피드 (`/feed.xml`, `/rss.xml`)
+- [x] robots.txt 설정
+- [x] Open Graph 메타데이터
+- [x] JSON-LD 구조화된 데이터
+- [x] 보안 헤더 설정
+- [x] Vercel 배포 설정 (`vercel.json`)
+- [x] Next.js 성능 최적화
 
 ## 📋 필수 설정
 
@@ -193,6 +199,78 @@ my-notion-blog-prd/
 - `filterPosts()`: 필터 옵션에 따라 포스트 필터링
 - `extractCategories()`: 모든 유니크한 카테고리 추출
 - `extractTags()`: 모든 유니크한 태그 추출
+
+## 🚀 Vercel 배포 가이드
+
+### 1. 저장소 연동
+```bash
+# GitHub에 코드 푸시
+git remote add origin https://github.com/yourusername/my-notion-blog-prd.git
+git push -u origin main
+```
+
+### 2. Vercel 배포
+1. [Vercel](https://vercel.com)에 접속
+2. "New Project" 클릭
+3. GitHub 저장소 선택
+4. 환경 변수 설정:
+   - `NOTION_API_KEY`: Notion API 키
+   - `NOTION_DATABASE_ID`: Notion 데이터베이스 ID
+   - `NEXT_PUBLIC_BASE_URL`: 배포된 도메인 (예: `https://yourdomain.vercel.app`)
+5. "Deploy" 클릭
+
+### 3. 커스텀 도메인
+1. Vercel 프로젝트 설정 → Domains
+2. 도메인 추가
+3. DNS 레코드 설정
+
+## 🔍 SEO 설정
+
+### 메타데이터
+- ✅ Open Graph (og:title, og:description, og:image)
+- ✅ Twitter Card 
+- ✅ 정규 URL (Canonical)
+- ✅ Keywords & Description
+
+### 사이트맵 및 RSS
+- `/sitemap.xml`: 동적으로 생성되는 XML 사이트맵
+- `/feed.xml` 또는 `/rss.xml`: RSS 피드
+- `robots.txt`: 검색 엔진 크롤링 지침
+
+### 구조화된 데이터
+- BlogPosting 스키마 (JSON-LD)
+- 각 포스트에 자동 적용
+
+### 성능 최적화
+- 이미지 포맷 자동 변환 (WebP, AVIF)
+- 응답 압축 (gzip)
+- 캐싱 전략 적용
+
+## 🔐 보안 기능
+
+- X-Content-Type-Options: nosniff
+- X-Frame-Options: SAMEORIGIN
+- X-XSS-Protection: 1; mode=block
+- Referrer-Policy: strict-origin-when-cross-origin
+
+## 📊 모니터링
+
+### Vercel Analytics
+배포 후 자동으로 활성화됨
+
+### Google Search Console
+1. [Google Search Console](https://search.google.com/search-console)에 접속
+2. 속성 추가
+3. 사이트맵 제출: `yourdomain.com/sitemap.xml`
+
+### Google Analytics (선택)
+`app/layout.tsx`에 추가 필요:
+```tsx
+<script
+  async
+  src={`https://www.googletagmanager.com/gtag/js?id=GA_ID`}
+/>
+```
 
 ## 📝 라이선스
 

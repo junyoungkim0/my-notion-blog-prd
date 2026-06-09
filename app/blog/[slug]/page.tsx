@@ -19,29 +19,68 @@ export async function generateMetadata({
 }: PostPageProps): Promise<Metadata> {
   try {
     const post = await getPostBySlug(params.slug);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://yourdomain.com";
 
     if (!post) {
       return {
         title: "포스트를 찾을 수 없습니다",
+        robots: {
+          index: false,
+          follow: false,
+        },
       };
     }
 
+    const postUrl = `${baseUrl}/blog/${post.slug}`;
+    const description = post.excerpt || post.content.substring(0, 160);
+
     return {
       title: post.title,
-      description: post.excerpt || post.content.substring(0, 160),
+      description: description,
       keywords: post.tags,
+      authors: [{ name: "블로그 작성자" }],
+      creator: "블로그 작성자",
+      publishedTime: post.createdAt,
+      modifiedTime: post.updatedAt || post.createdAt,
       openGraph: {
-        title: post.title,
-        description: post.excerpt || post.content.substring(0, 160),
-        images: post.cover ? [{ url: post.cover }] : [],
         type: "article",
+        locale: "ko_KR",
+        url: postUrl,
+        title: post.title,
+        description: description,
+        images: post.cover
+          ? [
+              {
+                url: post.cover,
+                width: 1200,
+                height: 630,
+                alt: post.title,
+                type: "image/jpeg",
+              },
+            ]
+          : [],
         publishedTime: post.createdAt,
-        authors: ["My Notion Blog"],
+        modifiedTime: post.updatedAt || post.createdAt,
+        authors: ["블로그 작성자"],
+        tags: post.tags,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: post.title,
+        description: description,
+        images: post.cover ? [post.cover] : [],
+      },
+      alternates: {
+        canonical: postUrl,
       },
     };
   } catch (error) {
     return {
       title: "오류가 발생했습니다",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 }
@@ -49,6 +88,7 @@ export async function generateMetadata({
 export default async function PostPage({ params }: PostPageProps) {
   try {
     const post = await getPostBySlug(params.slug);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://yourdomain.com";
 
     if (!post) {
       notFound();
@@ -64,8 +104,37 @@ export default async function PostPage({ params }: PostPageProps) {
         .slice(0, 3);
     }
 
+    // JSON-LD 구조화된 데이터
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.excerpt || post.content.substring(0, 160),
+      image: post.cover ? [post.cover] : [],
+      datePublished: post.createdAt,
+      dateModified: post.updatedAt || post.createdAt,
+      author: {
+        "@type": "Person",
+        name: "블로그 작성자",
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": `${baseUrl}/blog/${post.slug}`,
+      },
+      keywords: post.tags.join(","),
+      articleBody: post.content,
+    };
+
     return (
       <div className="max-w-4xl mx-auto">
+        {/* JSON-LD 구조화된 데이터 */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData),
+          }}
+        />
+
         <article>
           <PostHeader post={post} />
           <PostContent content={post.content} />
